@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import "../styles/App.css"; 
-import { useWebSocket } from "../hooks/useWebSocket"; // Import the custom hook
+import "../styles/App.css";
+import { useWebSocket } from "../hooks/useWebSocket";
 import { formatTimestamp } from "../utils/formatTimestamp";
 
-
 function App() {
-  const [message, setMessage] = useState<string>(""); // Message to send
-  const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the message container
+  const [message, setMessage] = useState<string>("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Use the custom WebSocket hook
   const { receivedMessages, sendMessage: sendWsMessage } = useWebSocket(
     "ws://localhost:8080"
   );
@@ -20,7 +18,6 @@ function App() {
     }
   }, [receivedMessages]);
 
-  // Function to send a message to the server
   const handleSendMessage = () => {
     if (message.trim() !== "") {
       sendWsMessage(message);
@@ -28,28 +25,10 @@ function App() {
     }
   };
 
-
-
   return (
     <div className="app-container">
       <div className="chat-container">
-        <h2 className="chat-heading">WebSocket</h2>
-
-        <div className="input-send-container">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") handleSendMessage();
-            }}
-            placeholder="Type your message..."
-            className="message-input"
-          />
-          <button onClick={handleSendMessage} className="send-button">
-            Send
-          </button>
-        </div>
+        <h2 className="chat-heading">BroadCast</h2>
 
         <div ref={messagesEndRef} className="messages-display">
           {receivedMessages.map((msg, index) => (
@@ -65,6 +44,22 @@ function App() {
               </span>
             </p>
           ))}
+        </div>
+
+        <div className="input-send-container">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") handleSendMessage();
+            }}
+            placeholder="Type your message..."
+            className="message-input"
+          />
+          <button onClick={handleSendMessage} className="send-button">
+            Send
+          </button>
         </div>
       </div>
     </div>

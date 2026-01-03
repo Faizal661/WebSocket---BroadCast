@@ -28,26 +28,36 @@ export const useWebSocket = (url: string): UseWebSocketResult => {
       setIsConnected(true);
       setReceivedMessages((prev) => [
         ...prev,
-        {
-          message: "Connected to server! 🎉🎉🎉",
-          timestamp: new Date().toISOString(),
-        },
+        // {
+        //   message: "Connected to server! 🎉🎉🎉",
+        //   timestamp: new Date().toISOString(),
+        // },
       ]);
-      setError(null); // Clear any previous errors
+      setError(null);
     };
 
     ws.current.onmessage = (event) => {
       console.log("Raw message from server:", event.data);
+      let newMessage: WebSocketMessage;
+
       try {
-        const parsedMessage: WebSocketMessage = JSON.parse(event.data);
-        setReceivedMessages((prev) => [...prev, parsedMessage]);
+        newMessage = JSON.parse(event.data);
       } catch (e) {
         console.error("Failed to parse message as JSON:", e, event.data);
-        setReceivedMessages((prev) => [
-          ...prev,
-          { message: String(event.data), timestamp: new Date().toISOString() },
-        ]);
+        newMessage = {
+          message: String(event.data),
+          timestamp: new Date().toISOString(),
+        };
       }
+
+      setReceivedMessages((prev) => {
+        const updatedMessages = [...prev, newMessage];
+        if (updatedMessages.length > 1000) {
+          return updatedMessages.slice(-1000);
+        }
+
+        return updatedMessages;
+      });
     };
 
     ws.current.onclose = () => {
@@ -98,7 +108,7 @@ export const useWebSocket = (url: string): UseWebSocketResult => {
         ]);
       }
     },
-    [] // No dependencies, as ws.current is a ref and its value is stable
+    [] // ws.current is a ref and its value is stable
   );
 
   return { receivedMessages, sendMessage, isConnected, error };
